@@ -1,0 +1,47 @@
+﻿Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: JOB
+
+; Microsoft Dynamics AX Job: PAAG_pruebas unloaded
+; --------------------------------------------------------------------------------
+  JOBVERSION 1
+  
+  SOURCE #PAAG_pruebas
+    #static void PAAG_pruebas(Args _args)
+    #{
+    #    CustTable           custTable, custTable2;
+    #    int                 counter = 0;
+    #    utcDateTime         dateTime;
+    #    str                 string1;
+    #    VIG_PAAG_TestClass  PAGClass = new VIG_PAAG_TestClass();
+    #    ;
+    #
+    #    while select custTable
+    #    {
+    #        //info(custTable.AccountNum);
+    #        counter++;
+    #        info(strFmt("Registro: %1 - %2", counter, custTable.AccountNum));
+    #    }
+    #
+    #    select count(AccountNum)
+    #    from custTable2
+    #    where custTable2.AccountNum LIKE "00000*"
+    #    ;
+    #    Info(strFmt("Tot1: %1 = Count of AccountNums", custTable2.accountNum));
+    #
+    #    select count(AccountNum)
+    #    from custTable
+    #    where custTable.AccountNum == "000002"
+    #    ;
+    #    info(strFmt("Tot2: %1 = Count of exacts", custTable.AccountNum));
+    #
+    #    info(strFmt("Class counter = %1", PAGClass.Counter()));
+    #}
+  ENDSOURCE
+  PROPERTIES
+    Origin              #{07CA32EC-07C9-40BD-8F48-F64696F99AA4}
+  ENDPROPERTIES
+  
+
+***Element: END

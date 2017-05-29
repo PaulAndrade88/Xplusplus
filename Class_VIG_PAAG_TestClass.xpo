@@ -1,0 +1,63 @@
+﻿Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_PAAG_TestClass unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_PAAG_TestClass
+    PROPERTIES
+      Name                #VIG_PAAG_TestClass
+      Extends             #RunBase
+      Origin              #{86DB6EA8-4407-4F38-8420-6ACE1BF7E8A8}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #caption
+        #public ClassDescription caption()
+        #{
+        #    ClassDescription ret;
+        #
+        #    ret = super();
+        #
+        #    return ret;
+        #}
+      ENDSOURCE
+      SOURCE #classDeclaration
+        #public class VIG_PAAG_TestClass extends RunBase
+        #{
+        #    int counter;
+        #    str detail;
+        #    boolean isValid;
+        #}
+        #
+      ENDSOURCE
+      SOURCE #Counter
+        #public int Counter()
+        #{
+        #
+        #    int ii;
+        #    for (ii = 0; ii < 100; ii++)
+        #    {
+        #        counter++;
+        #    }
+        #
+        #    return counter;
+        #}
+      ENDSOURCE
+      SOURCE #dialog
+        #protected Object dialog()
+        #{
+        #    Object ret;
+        #
+        #    ret = super();
+        #
+        #    return ret;
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: END

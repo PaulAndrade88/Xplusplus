@@ -1,0 +1,188 @@
+﻿Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_Mailer unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_Mailer
+    PROPERTIES
+      Name                #VIG_Mailer
+      Origin              #{53A59F7B-5487-4C91-A6ED-6E036CD07429}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #/*************************************************************
+        #*   Company: Grupo VIGIA
+        #*   Developer: Erick Francisco Solis Andrade
+        #*   Date: 04/04/2017
+        #*   Description: This Class will be used to send a Email with the
+        #*       system params, the method that ypu should call is SendEmail()
+        #***************************************************************/
+        #class VIG_Mailer
+        #{
+        #    FilenameOpen    parmFilePath;
+        #
+        #
+        #    #define.AdminEmail('admin.vigia@vigia.com')
+        #}
+      ENDSOURCE
+      SOURCE #getSubject
+        #/**********************************************************************
+        #* Company: Grupos VIGIA
+        #* Developer: Erick Francisco Solis Andrade
+        #* Date: 4/4/2017
+        #* Description: Method that set the subject
+        #************************************************************************/
+        #public Str1260 getSubject(KindOfUser _kind)
+        #{
+        #    Str1260     subject;
+        #    CompanyInfo company;
+        #    ;
+        #    company = CompanyInfo::findDataArea(curext());
+        #    switch(_kind)
+        #    {
+        #        case KindOfUser::Developer:
+        #            subject = "@VIG56";
+        #        break;
+        #
+        #        case KindOfUser::Invoice:
+        #            subject = "@SYS341983";
+        #        break;
+        #
+        #        case KindOfUser::Purchase:
+        #            subject = strFmt("@SYS114676" + " - %1", company.Name);
+        #        break;
+        #
+        #        case KindOfUser::Sales:
+        #            subject = strFmt("@SYS7443" + " - %1", company.Name);
+        #        break;
+        #
+        #        case KindOfUser::Test:
+        #            subject = "@VIG57";
+        #        break;
+        #
+        #        default:
+        #            subject = strFmt("@SYS99576" + " - %1", company.Name);
+        #        break;
+        #    }
+        #
+        #    return subject;
+        #
+        #}
+      ENDSOURCE
+      SOURCE #parmFile
+        #public void parmFile(FilenameOpen _parmFile)
+        #{
+        #    parmFilePath = _parmFile;
+        #}
+      ENDSOURCE
+      SOURCE #SendEmail
+        #/*******************************************************************************************
+        #*   Company: Grupo VIGIA
+        #*   Developer: Erick Francisco Solis Andrade
+        #*   Date: 04/04/2017
+        #*   Description: This method generate and send a Email with default options
+        #*******************************************************************************************/
+        #public void SendEmail(Str1260 _subject = "", Str1260 _body = "", KindOfUser _kind = KindOfUser::Test, Email _toEmail = "", NoYes _hasAttachments = NoYes::No)
+        #{
+        #    SysEmailParameters      parameters = SysEmailParameters::find();
+        #    SMTPRelayServerName     relayServer;
+        #    SMTPPortNumber          portNumber;
+        #    SMTPUserName            userName;
+        #    SMTPPassword            password;
+        #    Str1260                 subject, body;
+        #    InteropPermission       interopPermission;
+        #    SysMailer               mailer;
+        #    System.Exception        e;
+        #    //SysMailerAttachments    attachments;
+        #
+        #    //Table of company Emails
+        #    VIG_EMails              eMails;
+        #    ;
+        #
+        #    if(parameters.SMTPRelayServerName)
+        #        relayServer = parameters.SMTPRelayServerName;
+        #    else
+        #        relayServer = parameters.SMTPServerIPAddress;
+        #
+        #    portNumber = parameters.SMTPPortNumber;
+        #    userName = parameters.SMTPUserName;
+        #    password = SysEmailParameters::password();
+        #    subject = this.getSubject(_kind);
+        #    if( _body == "" )
+        #        _body = "<B>Sin Texto</B>";
+        #    else
+        #        body = _body;
+        #
+        #    CodeAccessPermission::revertAssert();
+        #
+        #    try
+        #    {
+        #        interopPermission = new InteropPermission(InteropKind::ComInterop);
+        #        interopPermission.assert();
+        #        mailer = new SysMailer();
+        #        mailer.SMTPRelayServer(relayServer, portNumber, userName, password, parameters.NTLM);
+        #
+        #        //Initiate Email
+        #        mailer.fromAddress(#AdminEmail);
+        #
+        #        mailer.tos().appendAddress(_toEmail);
+        #
+        #        While select eMails where eMails.KindOfUser == _kind
+        #        {
+        #            mailer.tos().appendAddress(eMails.Email, eMails.Name);
+        #        }
+        #
+        #        mailer.subject(_subject);
+        #        mailer.htmlBody(_body);
+        #
+        #        if(_hasAttachments)
+        #        {
+        #            this.setAttachments(mailer);
+        #        }
+        #
+        #        mailer.sendMail();
+        #        CodeAccessPermission::revertAssert();
+        #
+        #        info("Email has been send!");
+        #
+        #    }
+        #    catch(Exception::CLRError)
+        #    {
+        #        e = CLRInterop::getLastException();
+        #
+        #        while(e)
+        #        {
+        #            info(e.get_Message());
+        #
+        #            e = e.get_InnerException();
+        #
+        #        }
+        #
+        #        error(e.ToString());
+        #        CodeAccessPermission::revertAssert();
+        #        info("@SYS50856");
+        #    }
+        #}
+      ENDSOURCE
+      SOURCE #setAttachments
+        #public SysMailer setAttachments(SysMailer _mailer)
+        #{
+        #    //Falta desarrollar funcionalidad para adjuntar archivo al correo
+        #    FilePath        file;
+        #    ;
+        #
+        #    _mailer.attachments().add(file);
+        #
+        #    return _mailer;
+        #
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: END

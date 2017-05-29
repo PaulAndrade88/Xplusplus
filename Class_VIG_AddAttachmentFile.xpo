@@ -1,0 +1,956 @@
+﻿Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_AddAttachmentFile unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_AddAttachmentFile
+    PROPERTIES
+      Name                #VIG_AddAttachmentFile
+      Extends             #RunBase
+      Origin              #{E0CE3C04-BFCE-40DD-A207-BC6E006D12B1}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #class VIG_AddAttachmentFile extends RunBase
+        #{
+        #    DialogField     fieldFilePath;
+        #
+        #    FileNameOpen    file;
+        #}
+      ENDSOURCE
+      SOURCE #dialog
+        #protected Object dialog()
+        #{
+        #    Dialog      dialog;
+        #    ;
+        #
+        #    dialog = super();
+        #
+        #    //Set a title for dialog
+        #    dialog.caption('@VIG58');
+        #
+        #    fieldFilePath = dialog.addField(extendedTypeStr(FileNameOpen), '@SYS133030');
+        #
+        #    return dialog;
+        #}
+      ENDSOURCE
+      SOURCE #getFromDialog
+        #public boolean getFromDialog()
+        #{
+        #    boolean     ret;
+        #
+        #    //Get Value
+        #    file = fieldFilePath.value();
+        #
+        #    ret = super();
+        #
+        #    return ret;
+        #}
+      ENDSOURCE
+      SOURCE #run
+        #public void run()
+        #{
+        #    VIG_Mailer      mailer;
+        #    ;
+        #    info("inicio");
+        #    mailer = new VIG_Mailer();
+        #    this.getFromDialog();
+        #    super();
+        #    if(file != "")
+        #    {
+        #        if( Box::okCancel('@SYS62667', DialogButton::Cancel) == DialogButton::Ok)
+        #        {
+        #            info('@VIG59');
+        #            mailer.parmFile(file);
+        #        }
+        #        else
+        #        {
+        #            info('@SYS111699');
+        #            file = "";
+        #        }
+        #    }
+        #    else
+        #    {
+        #        warning('@SYS111699');
+        #    }
+        #}
+      ENDSOURCE
+      SOURCE #main
+        #public static void main(Args _args)
+        #{
+        #    VIG_AddAttachmentFile       addFile = new VIG_AddAttachmentFile();
+        #
+        #    if(addFile.prompt())
+        #    {
+        #        addFile.run();
+        #    }
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_CreateCommaFile unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_CreateCommaFile
+    PROPERTIES
+      Name                #VIG_CreateCommaFile
+      Origin              #{D58A357B-1CBB-430F-8BAA-506E1D04EECB}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #class VIG_CreateCommaFile
+        #{
+        #}
+      ENDSOURCE
+      SOURCE #main
+        #static server void main(Args _args)
+        #{
+        #    CommaTextIo         file;
+        #    container           line;
+        #    MainAccount         mainAccount;
+        #    FileIOPermission    perm;
+        #    #define.filename(@'C:\Temp\accounts.csv')
+        #    #File
+        #
+        #    perm = new FileIOPermission(#filename, #io_write);
+        #    perm.assert();
+        #
+        #    file = new CommaTextIo(#filename, #io_write);
+        #
+        #    if(!file || file.status() != IO_Status::Ok)
+        #    {
+        #        throw error("File cannot be openend.");
+        #    }
+        #
+        #    file.outRecordDelimiter('\r\n');
+        #    file.outFieldDelimiter(',');
+        #
+        #    while select MainAccountId, Name from mainAccount
+        #        order by MainAccountId
+        #        Where mainAccount.LedgerChartOfAccounts ==
+        #            LedgerChartOfAccounts::current()
+        #    {
+        #        line = [
+        #            mainAccount.MainAccountId,
+        #            mainAccount.Name];
+        #        file.writeExp(line);
+        #    }
+        #
+        #    CodeAccessPermission::revertAssert();
+        #
+        #    info(strFmt("File %1 created.", #filename));
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_CreateXmlFile unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_CreateXmlFile
+    PROPERTIES
+      Name                #VIG_CreateXmlFile
+      Origin              #{30D214C5-0F9A-46BE-82D1-1F552C7F4105}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #class VIG_CreateXmlFile
+        #{
+        #}
+      ENDSOURCE
+      SOURCE #main
+        #static void main(Args _args)
+        #{
+        #    XmlDocument doc;
+        #    XmlElement nodeXml;
+        #    XmlElement nodeTable;
+        #    XmlElement nodeAccount;
+        #    XmlElement nodeName;
+        #    MainAccount mainAccount;
+        #    #define.filename(@'C:\Temp\accounts.xml')
+        #
+        #    doc     = XmlDocument::newBlank();
+        #
+        #    nodeXml = doc.createElement('xml');
+        #
+        #    doc.appendChild(nodeXml);
+        #
+        #    while select RecId, MainAccountId, Name from mainAccount
+        #        order by mainAccountId
+        #        where mainAccount.LedgerChartOfAccounts ==
+        #            LedgerChartOfAccounts::current()
+        #    {
+        #        nodeTable = doc.createElement(tableStr(mainAccount));
+        #
+        #        nodeTable.setAttribute(
+        #            fieldStr(mainAccount, RecId),
+        #            int642str(mainAccount.RecId));
+        #
+        #        nodeXml.appendChild(nodeTable);
+        #
+        #        nodeAccount = doc.createElement(
+        #            fieldStr(MainAccount, MainAccountId));
+        #
+        #        nodeAccount.appendChild(
+        #            doc.createTextNode(mainAccount.MainAccountId));
+        #
+        #        nodeTable.appendChild(nodeAccount);
+        #
+        #        nodeName = doc.createElement(
+        #        fieldStr(mainAccount, Name));
+        #
+        #        nodeName.appendChild(
+        #            doc.createTextNode(mainAccount.Name));
+        #
+        #        nodeTable.appendChild(nodeName);
+        #
+        #    }
+        #
+        #    doc.save(#filename);
+        #
+        #    info(strFmt("File %1 created.", #filename));
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_CustCreate unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_CustCreate
+    PROPERTIES
+      Name                #VIG_CustCreate
+      Extends             #RunBase
+      Origin              #{7C7BFD68-7FBE-4A59-9313-38082501E456}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #class VIG_CustCreate extends RunBase
+        #{
+        #    DialogField     fieldAccount;
+        #    DialogField     fieldName;
+        #    DialogField     fieldGroup;
+        #    DialogField     fieldCurrency;
+        #    DialogField     fieldPaymTermId;
+        #    DialogField     fieldPaymMode;
+        #    CustAccount     custAccount;
+        #    CustName        custName;
+        #    CustGroupId     custGroupId;
+        #    CurrencyCode    currencyCode;
+        #    CustPaymTermId  paymTermId;
+        #    CustPaymMode    paymMode;
+        #}
+      ENDSOURCE
+      SOURCE #dialog
+        #protected Object dialog()
+        #{
+        #    Dialog          dialog;
+        #    DialogGroup     groupCustomer;
+        #    DialogGroup     groupPayment;
+        #
+        #    dialog = super();
+        #
+        #    dialog.caption("Customer information");
+        #
+        #    fieldAccount    = dialog.addField(
+        #        extendedTypeStr(CustVendAC),
+        #        "Customer account");
+        #
+        #    fieldName       =
+        #        dialog.addField(extendedTypeStr(custName));
+        #
+        #    dialog.addTabPage("Details");
+        #
+        #    groupCustomer   = dialog.addGroup("Setup");
+        #    fieldGroup      = dialog.addField(
+        #        extendedTypeStr(custGroupId));
+        #    fieldCurrency   = dialog.addField(
+        #        extendedTypeStr(currencyCode));
+        #
+        #    groupPayment    = dialog.addGroup("Payment");
+        #    fieldPaymTermId = dialog.addField(
+        #        extendedTypeStr(CustPaymTermId));
+        #    fieldPaymMode   = dialog.addField(
+        #        extendedTypeStr(CustPaymMode));
+        #
+        #    return dialog;
+        #
+        #}
+      ENDSOURCE
+      SOURCE #getFromDialog
+        #public boolean getFromDialog()
+        #{
+        #    custAccount     = fieldAccount.value();
+        #    custName        = fieldName.value();
+        #    custGroupId     = fieldGroup.value();
+        #    currencyCode    = fieldCurrency.value();
+        #    paymTermId      = fieldPaymTermId.value();
+        #    paymMode        = fieldPaymMode.value();
+        #    return super();
+        #}
+      ENDSOURCE
+      SOURCE #pack
+        #container pack()
+        #{
+        #    return conNull();
+        #}
+      ENDSOURCE
+      SOURCE #run
+        #void run()
+        #{
+        #    info("You have entered customer information:");
+        #    info(strFmt("Account: %1", custAccount));
+        #    info(strFmt("Name: %1", custName));
+        #    info(strFmt("Group: %1", custGroupId));
+        #    info(strFmt("Currency: %1", currencyCode));
+        #    info(strFmt("Terms of payment: %1", paymTermId));
+        #    info(strFmt("Method of payment: %1", paymMode));
+        #}
+      ENDSOURCE
+      SOURCE #unpack
+        #boolean unpack(container _packedClass)
+        #{
+        #    return true;
+        #}
+      ENDSOURCE
+      SOURCE #main
+        #static void main(Args _args)
+        #{
+        #    VIG_CustCreate custCreate = new VIG_CustCreate();
+        #
+        #    if (custCreate.prompt())
+        #    {
+        #        custCreate.run();
+        #    }
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_CustGroupDynamic unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_CustGroupDynamic
+    PROPERTIES
+      Name                #VIG_CustGroupDynamic
+      Origin              #{C6AE6A3C-EFE2-4BCC-9F9F-A14BD90497DD}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #class VIG_CustGroupDynamic
+        #{
+        #}
+      ENDSOURCE
+      SOURCE #main
+        #static void main(Args _args)
+        #{
+        #    DictTable                       dictTable;
+        #    Form                            form;
+        #    FormBuildDesign                 desing;
+        #    FormBuildDataSource             ds;
+        #    FormBuildActionPaneControl      actionPane;
+        #    FormBuildActionPaneTabControl   actionPaneTab;
+        #    FormBuildButtonGroupControl     btngrp1;
+        #    FormBuildButtonGroupControl     btngrp2;
+        #    FormBuildCommandButtonControl   cmdNew;
+        #    FormBuildCommandButtonControl   cmdDel;
+        #    FormBuildMenuButtonControl      mbPosting;
+        #    FormBuildFunctionButtonControl  mibPosting;
+        #    FormBuildFunctionButtonControl  mibForecast;
+        #    FormBuildGridControl            grid;
+        #    FormBuildGridControl            grpBody;
+        #    Args                            args;
+        #    FormRun                         formRun;
+        #    #Task
+        #
+        #    dictTable = new DictTable(tableNum(CustGroup));
+        #
+        #    form = new form();
+        #    form.name("CustGroupDynamic");
+        #
+        #    ds = form.addDataSource(dictTable.name());
+        #    ds.table(dictTable.id());
+        #
+        #    desing = form.addDesign('Design');
+        #    desing.caption("Customer groups");
+        #    desing.style(FormStyle::SimpleList);
+        #    desing.titleDatasource(ds.id());
+        #
+        #    actionPane = desing.addControl(
+        #        FormControlType::ActionPane, 'ActionPane');
+        #    actionPane.style(ActionPaneStyle::Strip);
+        #    actionPaneTab = actionPane.addControl(
+        #        FormControlType::ActionPaneTab, 'ActionPaneTab');
+        #
+        #    btngrp1 = actionPaneTab.addControl(
+        #        FormControlType::ButtonGroup, 'NewDeleteGroup');
+        #    btngrp2 = actionPaneTab.addControl(
+        #        FormControlType::ButtonGroup, 'ButtonGroup');
+        #
+        #    cmdNew = btngrp1.addControl(
+        #        FormControlType::CommandButton, 'NewButton');
+        #    cmdNew.buttonDisplay(FormButtonDisplay::TextAndImageLeft);
+        #    cmdNew.normalImage('11045');
+        #    cmdNew.imageLocation(SysImageLocation::EmbeddedResource);
+        #    cmdNew.primary(NoYes::Yes);
+        #    cmdNew.command(#taskNew);
+        #
+        #    cmdDel = btngrp1.addControl(
+        #        FormControlType::CommandButton, 'NewButton');
+        #    cmdDel.text("Delete");
+        #    cmdDel.ButtonDisplay(FormButtonDisplay::TextAndImageLeft);
+        #    cmdDel.normalImage('10121');
+        #    cmdDel.imageLocation(SysImageLocation::EmbeddedResource);
+        #    cmdDel.saveRecord(NoYes::Yes);
+        #    cmdDel.primary(NoYes::Yes);
+        #    cmdDel.command(#taskDeleteRecord);
+        #
+        #    mbPosting = btngrp2.addControl(
+        #        FormControlType::MenuButton, 'MenuButtonPosting');
+        #    mbPosting.helpText("Set up related data for the group.");
+        #    mbPosting.text("Setup");
+        #
+        #    mibPosting = btngrp2.addControl(
+        #        FormControlType::MenuFunctionButton, 'Posting');
+        #    mibPosting.text('Item posting');
+        #    mibPosting.saverecord(NoYes::No);
+        #    mibPosting.dataSource(ds.id());
+        #    mibPosting.menuItemName(menuitemDisplayStr(InventPosting));
+        #
+        #    mibForecast = btngrp2.addControl(
+        #        FormControlType::MenuFunctionButton, 'SalesForecast');
+        #    mibForecast.text('Forecast');
+        #    mibForecast.saveRecord(NoYes::No);
+        #    mibForecast.menuItemName(
+        #        menuitemDisplayStr(ForecastSalesGroup));
+        #
+        #    grpBody = desing.addControl(FormControlType::Group, 'Body');
+        #    grpBody.heightMode(FormHeight::ColumnHeight);
+        #    //grpBody.columnspace(0);
+        #    grpBody.style(GroupStyle::BorderlessGridContainer);
+        #
+        #    grid = grpBody.addControl(FormControlType::Grid, "Grid");
+        #    grid.datasource(ds.name());
+        #    grid.showRowLabels(false);
+        #    grid.widthMode(FormWidth::ColumnWidth);
+        #    grid.heightMode(FormHeight::ColumnHeight);
+        #
+        #    grid.addDataField(
+        #        ds.id(), fieldNum(CustGroup, CustGroup));
+        #
+        #    grid.addDataField(
+        #        ds.id(), fieldNum(CustGroup, Name));
+        #
+        #    grid.addDataField(
+        #        ds.id(), fieldNum(CustGroup, PaymTermId));
+        #
+        #    grid.addDataField(
+        #        ds.id(), fieldNum(CustGroup,ClearingPeriod));
+        #
+        #    grid.addDataField(
+        #        ds.id(), fieldNum(CustGroup,BankCustPaymIdTable));
+        #
+        #    grid.addDataField(
+        #        ds.id(), fieldNum(CustGroup, TaxGroupId));
+        #
+        #    args = new args();
+        #    args.object(form);
+        #
+        #    formRun = classFactory.formRunClass(args);
+        #    formRun.init();
+        #    formRun.run();
+        #
+        #    formRun.detach();
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_CustSelect unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_CustSelect
+    PROPERTIES
+      Name                #VIG_CustSelect
+      Extends             #RunBase
+      Origin              #{D2619EA7-920B-4CCC-BC0B-6DEAE2A3EC5F}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #class VIG_CustSelect extends RunBase
+        #{
+        #    DialogField fieldAccount;
+        #    DialogField fieldName;
+        #    DialogField fieldGroup;
+        #    DialogField fieldCurrency;
+        #    DialogField fieldPaymTermId;
+        #    DialogField fieldPaymMode;
+        #}
+      ENDSOURCE
+      SOURCE #dialog
+        #protected Object dialog()
+        #{
+        #    Dialog          dialog;
+        #    DialogGroup     groupCustomer;
+        #    DialogGroup     groupPayment;
+        #
+        #    dialog = super();
+        #
+        #    dialog.caption("Customer information");
+        #    dialog.allowUpdateOnSelectCtrl(true);
+        #
+        #    fieldAccount    = dialog.addField(
+        #        extendedTypeStr(CustAccount),
+        #        "Customer account");
+        #
+        #    fieldName       = dialog.addField(extendedTypeStr(CustName));
+        #    fieldName.enabled(false);
+        #
+        #    dialog.addTabPage("Details");
+        #
+        #    groupCustomer   = dialog.addGroup("Setup");
+        #    fieldGroup      = dialog.addField(
+        #        extendedTypeStr(CustGroupId));
+        #    fieldCurrency   = dialog.addField(
+        #        extendedTypeStr(CurrencyCode));
+        #    fieldGroup.enabled(false);
+        #    fieldCurrency.enabled(false);
+        #
+        #    groupPayment    = dialog.addGroup("Payment");
+        #
+        #    fieldPaymTermId = dialog.addField(
+        #        extendedTypeStr(CustPaymTermId));
+        #    fieldPaymMode   = dialog.addField(
+        #        extendedTypeStr(CustPaymMode));
+        #    fieldPaymTermId.enabled(false);
+        #    fieldPaymMode.enabled(false);
+        #
+        #    return dialog;
+        #}
+      ENDSOURCE
+      SOURCE #dialogPostRun
+        #public void dialogPostRun(DialogRunbase dialog)
+        #{
+        #    dialog.formRun().controlMethodOverload(true);
+        #    dialog.formRun().controlMethodOverloadObject(this);
+        #    super(dialog);
+        #}
+      ENDSOURCE
+      SOURCE #dialogSelectCtrl
+        #void dialogSelectCtrl()
+        #{
+        #    CustTable custTable;
+        #
+        #    custTable = custTable::find(fieldAccount.value());
+        #    fieldName.value(custTable.name());
+        #    fieldGroup.value(custTable.CustGroup);
+        #    fieldCurrency.value(custTable.Currency);
+        #    fieldPaymTermId.value(custTable.PaymTermId);
+        #    fieldPaymMode.value(custTable.PaymMode);
+        #}
+      ENDSOURCE
+      SOURCE #pack
+        #container pack()
+        #{
+        #    return conNull();
+        #}
+      ENDSOURCE
+      SOURCE #TabPg_1_pageActivated
+        #void TabPg_1_pageActivated()
+        #{
+        #    info('Tab page activated');
+        #}
+      ENDSOURCE
+      SOURCE #unpack
+        #boolean unpack(container _packedClass)
+        #{
+        #    return true;
+        #}
+      ENDSOURCE
+      SOURCE #main
+        #static void main(Args _args)
+        #{
+        #    VIG_CustSelect custSelect = new VIG_CustSelect();
+        #
+        #    if (custSelect.prompt())
+        #    {
+        #        custSelect.run();
+        #    }
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_Mailer unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_Mailer
+    PROPERTIES
+      Name                #VIG_Mailer
+      Origin              #{53A59F7B-5487-4C91-A6ED-6E036CD07429}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #/*************************************************************
+        #*   Company: Grupo VIGIA
+        #*   Developer: Erick Francisco Solis Andrade
+        #*   Date: 04/04/2017
+        #*   Description: This Class will be used to send a Email with the
+        #*       system params, the method that ypu should call is SendEmail()
+        #***************************************************************/
+        #class VIG_Mailer
+        #{
+        #    FilenameOpen    parmFilePath;
+        #
+        #
+        #    #define.AdminEmail('admin.vigia@vigia.com')
+        #}
+      ENDSOURCE
+      SOURCE #getSubject
+        #/**********************************************************************
+        #* Company: Grupos VIGIA
+        #* Developer: Erick Francisco Solis Andrade
+        #* Date: 4/4/2017
+        #* Description: Method that set the subject
+        #************************************************************************/
+        #public Str1260 getSubject(KindOfUser _kind)
+        #{
+        #    Str1260     subject;
+        #    CompanyInfo company;
+        #    ;
+        #    company = CompanyInfo::findDataArea(curext());
+        #    switch(_kind)
+        #    {
+        #        case KindOfUser::Developer:
+        #            subject = "@VIG56";
+        #        break;
+        #
+        #        case KindOfUser::Invoice:
+        #            subject = "@SYS341983";
+        #        break;
+        #
+        #        case KindOfUser::Purchase:
+        #            subject = strFmt("@SYS114676" + " - %1", company.Name);
+        #        break;
+        #
+        #        case KindOfUser::Sales:
+        #            subject = strFmt("@SYS7443" + " - %1", company.Name);
+        #        break;
+        #
+        #        case KindOfUser::Test:
+        #            subject = "@VIG57";
+        #        break;
+        #
+        #        default:
+        #            subject = strFmt("@SYS99576" + " - %1", company.Name);
+        #        break;
+        #    }
+        #
+        #    return subject;
+        #
+        #}
+      ENDSOURCE
+      SOURCE #parmFile
+        #public void parmFile(FilenameOpen _parmFile)
+        #{
+        #    parmFilePath = _parmFile;
+        #}
+      ENDSOURCE
+      SOURCE #SendEmail
+        #/*******************************************************************************************
+        #*   Company: Grupo VIGIA
+        #*   Developer: Erick Francisco Solis Andrade
+        #*   Date: 04/04/2017
+        #*   Description: This method generate and send a Email with default options
+        #*******************************************************************************************/
+        #public void SendEmail(Str1260 _subject = "", Str1260 _body = "", KindOfUser _kind = KindOfUser::Test, Email _toEmail = "", NoYes _hasAttachments = NoYes::No)
+        #{
+        #    SysEmailParameters      parameters = SysEmailParameters::find();
+        #    SMTPRelayServerName     relayServer;
+        #    SMTPPortNumber          portNumber;
+        #    SMTPUserName            userName;
+        #    SMTPPassword            password;
+        #    Str1260                 subject, body;
+        #    InteropPermission       interopPermission;
+        #    SysMailer               mailer;
+        #    System.Exception        e;
+        #    //SysMailerAttachments    attachments;
+        #
+        #    //Table of company Emails
+        #    VIG_EMails              eMails;
+        #    ;
+        #
+        #    if(parameters.SMTPRelayServerName)
+        #        relayServer = parameters.SMTPRelayServerName;
+        #    else
+        #        relayServer = parameters.SMTPServerIPAddress;
+        #
+        #    portNumber = parameters.SMTPPortNumber;
+        #    userName = parameters.SMTPUserName;
+        #    password = SysEmailParameters::password();
+        #    subject = this.getSubject(_kind);
+        #    if( _body == "" )
+        #        _body = "<B>Sin Texto</B>";
+        #    else
+        #        body = _body;
+        #
+        #    CodeAccessPermission::revertAssert();
+        #
+        #    try
+        #    {
+        #        interopPermission = new InteropPermission(InteropKind::ComInterop);
+        #        interopPermission.assert();
+        #        mailer = new SysMailer();
+        #        mailer.SMTPRelayServer(relayServer, portNumber, userName, password, parameters.NTLM);
+        #
+        #        //Initiate Email
+        #        mailer.fromAddress(#AdminEmail);
+        #
+        #        mailer.tos().appendAddress(_toEmail);
+        #
+        #        While select eMails where eMails.KindOfUser == _kind
+        #        {
+        #            mailer.tos().appendAddress(eMails.Email, eMails.Name);
+        #        }
+        #
+        #        mailer.subject(_subject);
+        #        mailer.htmlBody(_body);
+        #
+        #        if(_hasAttachments)
+        #        {
+        #            this.setAttachments(mailer);
+        #        }
+        #
+        #        mailer.sendMail();
+        #        CodeAccessPermission::revertAssert();
+        #
+        #        info("Email has been send!");
+        #
+        #    }
+        #    catch(Exception::CLRError)
+        #    {
+        #        e = CLRInterop::getLastException();
+        #
+        #        while(e)
+        #        {
+        #            info(e.get_Message());
+        #
+        #            e = e.get_InnerException();
+        #
+        #        }
+        #
+        #        error(e.ToString());
+        #        CodeAccessPermission::revertAssert();
+        #        info("@SYS50856");
+        #    }
+        #}
+      ENDSOURCE
+      SOURCE #setAttachments
+        #public SysMailer setAttachments(SysMailer _mailer)
+        #{
+        #    //Falta desarrollar funcionalidad para adjuntar archivo al correo
+        #    FilePath        file;
+        #    ;
+        #
+        #    _mailer.attachments().add(file);
+        #
+        #    return _mailer;
+        #
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_PAAG_TestClass unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_PAAG_TestClass
+    PROPERTIES
+      Name                #VIG_PAAG_TestClass
+      Extends             #RunBase
+      Origin              #{86DB6EA8-4407-4F38-8420-6ACE1BF7E8A8}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #caption
+        #public ClassDescription caption()
+        #{
+        #    ClassDescription ret;
+        #
+        #    ret = super();
+        #
+        #    return ret;
+        #}
+      ENDSOURCE
+      SOURCE #classDeclaration
+        #public class VIG_PAAG_TestClass extends RunBase
+        #{
+        #    int counter;
+        #    str detail;
+        #    boolean isValid;
+        #}
+        #
+      ENDSOURCE
+      SOURCE #Counter
+        #public int Counter()
+        #{
+        #
+        #    int ii;
+        #    for (ii = 0; ii < 100; ii++)
+        #    {
+        #        counter++;
+        #    }
+        #
+        #    return counter;
+        #}
+      ENDSOURCE
+      SOURCE #dialog
+        #protected Object dialog()
+        #{
+        #    Object ret;
+        #
+        #    ret = super();
+        #
+        #    return ret;
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_ReadCommaFile unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_ReadCommaFile
+    PROPERTIES
+      Name                #VIG_ReadCommaFile
+      Origin              #{F734067B-4081-44BD-B270-9905E4192F9A}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #class VIG_ReadCommaFile
+        #{
+        #}
+      ENDSOURCE
+      SOURCE #main
+        #static client void main(Args _args)
+        #{
+        #    CommaTextIo         file;
+        #    container           line;
+        #    #define.filename(@'C:\Temp\accounts.csv')
+        #    #File
+        #
+        #    file = new CommaTextIo(#filename, #io_read);
+        #
+        #    if(!file || file.status() != IO_Status::Ok)
+        #    {
+        #        throw error("File cannot be opened.");
+        #    }
+        #
+        #    file.inRecordDelimiter('\r\n');
+        #    file.inFieldDelimiter(',');
+        #
+        #    line = file.read();
+        #
+        #    while (file.status() == IO_Status::Ok)
+        #    {
+        #        info(con2Str(line, ' - '));
+        #        line = file.read();
+        #    }
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_ReadXmlFile unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_ReadXmlFile
+    PROPERTIES
+      Name                #VIG_ReadXmlFile
+      Origin              #{A3AAADB5-6BE6-4CB8-9F33-E54382A64368}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #class VIG_ReadXmlFile
+        #{
+        #}
+      ENDSOURCE
+      SOURCE #main
+        #static void main(Args _args)
+        #{
+        #    XmlDocument doc = new XMLDocument();
+        #    XmlNodeList data;
+        #    XmlElement nodeTable;
+        #    XmlElement nodeAccount;
+        #    XmlElement nodeName;
+        #    #define.filename(@'C:\Temp\accounts.xml')
+        #
+        #    doc = XmlDocument::newFile(#filename);
+        #
+        #    data = doc.selectNodes('/xml/mainAccount');//('//'+tableStr(MainAccount))
+        #
+        #    nodeTable = data.nextNode();
+        #
+        #    while (nodeTable)
+        #    {
+        #        nodeAccount = nodeTable.selectSingleNode(
+        #            fieldStr(MainAccount, MainAccountId));
+        #
+        #        nodeName = nodeTable.selectSingleNode(
+        #            fieldStr(MainAccount, Name));
+        #
+        #        info(strFmt(
+        #            "%1 - %2",
+        #            nodeAccount.text(),
+        #            nodeName.text()));
+        #
+        #        nodeTable = data.nextNode();
+        #
+        #    }
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: END

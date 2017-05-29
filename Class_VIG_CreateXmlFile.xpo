@@ -1,0 +1,78 @@
+﻿Exportfile for AOT version 1.0 or later
+Formatversion: 1
+
+***Element: CLS
+
+; Microsoft Dynamics AX Class: VIG_CreateXmlFile unloaded
+; --------------------------------------------------------------------------------
+  CLSVERSION 1
+  
+  CLASS #VIG_CreateXmlFile
+    PROPERTIES
+      Name                #VIG_CreateXmlFile
+      Origin              #{30D214C5-0F9A-46BE-82D1-1F552C7F4105}
+    ENDPROPERTIES
+    
+    METHODS
+      SOURCE #classDeclaration
+        #class VIG_CreateXmlFile
+        #{
+        #}
+      ENDSOURCE
+      SOURCE #main
+        #static void main(Args _args)
+        #{
+        #    XmlDocument doc;
+        #    XmlElement nodeXml;
+        #    XmlElement nodeTable;
+        #    XmlElement nodeAccount;
+        #    XmlElement nodeName;
+        #    MainAccount mainAccount;
+        #    #define.filename(@'C:\Temp\accounts.xml')
+        #
+        #    doc     = XmlDocument::newBlank();
+        #
+        #    nodeXml = doc.createElement('xml');
+        #
+        #    doc.appendChild(nodeXml);
+        #
+        #    while select RecId, MainAccountId, Name from mainAccount
+        #        order by mainAccountId
+        #        where mainAccount.LedgerChartOfAccounts ==
+        #            LedgerChartOfAccounts::current()
+        #    {
+        #        nodeTable = doc.createElement(tableStr(mainAccount));
+        #
+        #        nodeTable.setAttribute(
+        #            fieldStr(mainAccount, RecId),
+        #            int642str(mainAccount.RecId));
+        #
+        #        nodeXml.appendChild(nodeTable);
+        #
+        #        nodeAccount = doc.createElement(
+        #            fieldStr(MainAccount, MainAccountId));
+        #
+        #        nodeAccount.appendChild(
+        #            doc.createTextNode(mainAccount.MainAccountId));
+        #
+        #        nodeTable.appendChild(nodeAccount);
+        #
+        #        nodeName = doc.createElement(
+        #        fieldStr(mainAccount, Name));
+        #
+        #        nodeName.appendChild(
+        #            doc.createTextNode(mainAccount.Name));
+        #
+        #        nodeTable.appendChild(nodeName);
+        #
+        #    }
+        #
+        #    doc.save(#filename);
+        #
+        #    info(strFmt("File %1 created.", #filename));
+        #}
+      ENDSOURCE
+    ENDMETHODS
+  ENDCLASS
+
+***Element: END
